@@ -30,8 +30,8 @@ trait Billable
      * Make a "one off" charge on the customer for the given amount.
      *
      * @param  int  $amount
-     * @param  array  $options
      * @return \Stripe\Charge
+     *
      * @throws \InvalidArgumentException
      */
     public function charge($amount, array $options = [])
@@ -57,8 +57,8 @@ trait Billable
      * Refund a customer for a charge.
      *
      * @param  string  $charge
-     * @param  array  $options
      * @return \Stripe\Refund
+     *
      * @throws \InvalidArgumentException
      */
     public function refund($charge, array $options = [])
@@ -83,8 +83,8 @@ trait Billable
      *
      * @param  string  $description
      * @param  int  $amount
-     * @param  array  $options
      * @return \Stripe\InvoiceItem
+     *
      * @throws \InvalidArgumentException
      */
     public function tab($description, $amount, array $options = [])
@@ -108,8 +108,6 @@ trait Billable
      *
      * @param  string  $description
      * @param  int  $amount
-     * @param  array  $tabOptions
-     * @param  array  $invoiceOptions
      * @return \Stripe\Invoice|bool
      */
     public function invoiceFor($description, $amount, array $tabOptions = [], array $invoiceOptions = [])
@@ -215,7 +213,6 @@ trait Billable
     /**
      * Invoice the billable entity outside of regular billing cycle.
      *
-     * @param  array  $options
      * @return \Stripe\Invoice|bool
      */
     public function invoice(array $options = [])
@@ -265,8 +262,8 @@ trait Billable
             );
 
             $stripeInvoice->lines = StripeInvoice::retrieve($id, $this->getStripeKey())
-                        ->lines
-                        ->all(['limit' => 1000]);
+                ->lines
+                ->all(['limit' => 1000]);
 
             return new Invoice($this, $stripeInvoice);
         } catch (Exception $e) {
@@ -299,7 +296,6 @@ trait Billable
      * Create an invoice download Response.
      *
      * @param  string  $id
-     * @param  array  $data
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function downloadInvoice($id, array $data)
@@ -320,7 +316,10 @@ trait Billable
 
         $parameters = array_merge(['limit' => 24], $parameters);
 
-        $stripeInvoices = $this->asStripeCustomer()->invoices($parameters);
+        $stripeInvoices = StripeInvoice::all(
+            ['customer' => $this->stripe_id] + $parameters,
+            ['api_key' => $this->getStripeKey()]
+        );
 
         // Here we will loop through the Stripe invoices and create our own custom Invoice
         // instances that have more helper methods and are generally more convenient to
@@ -339,7 +338,6 @@ trait Billable
     /**
      * Get an array of the entity's invoices.
      *
-     * @param  array  $parameters
      * @return \Illuminate\Support\Collection
      */
     public function invoicesIncludingPending(array $parameters = [])
@@ -548,7 +546,6 @@ trait Billable
     /**
      * Create a Stripe customer for the given model.
      *
-     * @param  array  $options
      * @return \Stripe\Customer
      */
     public function createAsStripeCustomer(array $options = [])
@@ -574,7 +571,6 @@ trait Billable
     /**
      * Update the underlying Stripe customer information for the model.
      *
-     * @param  array  $options
      * @return \Stripe\Customer
      */
     public function updateStripeCustomer(array $options = [])
