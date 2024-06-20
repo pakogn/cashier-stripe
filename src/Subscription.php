@@ -17,14 +17,11 @@ class Subscription extends Model
      */
     protected $guarded = [];
 
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = [
-        'trial_ends_at', 'ends_at',
-        'created_at', 'updated_at',
+    protected $casts = [
+        'trial_ends_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -455,6 +452,7 @@ class Subscription extends Model
      * Resume the cancelled subscription.
      *
      * @return $this
+     *
      * @throws \LogicException
      */
     public function resume()
@@ -506,6 +504,7 @@ class Subscription extends Model
      * Get the subscription as a Stripe subscription object.
      *
      * @return \Stripe\Subscription
+     *
      * @throws \LogicException
      */
     public function asStripeSubscription()
